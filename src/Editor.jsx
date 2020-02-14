@@ -38,6 +38,10 @@ modes.allValues = values;
  * triggered when the contents of the JSONEditor change.
  * Called without parameters. Will only be triggered on changes made by the user.
  * Return new json.
+ * @property {Function} [onChangeText] - Set a callback function
+ * triggered when the text contents of the JSONEditor change.
+ * Called without parameters. Will be triggered on any changes made by the user.
+ * Return new text.
  * @property {Function} [onError] - Set a callback function triggered when an error occurs.
  * Invoked with the error as first argument.
  * The callback is only invoked for errors triggered by a users action,
@@ -76,6 +80,7 @@ export default class Editor extends Component {
         this.jsonEditor = null;
 
         this.handleChange = this.handleChange.bind(this);
+        this.handleChangeText = this.handleChangeText.bind(this);
         this.setRef = this.setRef.bind(this);
         this.collapseAll = this.collapseAll.bind(this);
         this.expandAll = this.expandAll.bind(this);
@@ -89,6 +94,7 @@ export default class Editor extends Component {
             htmlElementProps,
             tag,
             onChange,
+            onChangeText,
             ...rest
         } = this.props;
 
@@ -109,6 +115,7 @@ export default class Editor extends Component {
         htmlElementProps,
         tag,
         onChange,
+        onChangeText,
         ...rest
     }) {
         if (this.jsonEditor) {
@@ -157,6 +164,7 @@ export default class Editor extends Component {
 
         this.jsonEditor = new JSONEditor(this.htmlElementRef, {
             onChange: this.handleChange,
+            onChangeText: this.handleChangeText,
             ...rest
         });
 
@@ -175,6 +183,17 @@ export default class Editor extends Component {
                 if (this.props.value !== currentJson) {
                     this.props.onChange(currentJson);
                 }
+            } catch (err) {
+                this.err = err;
+            }
+        }
+    }
+
+    handleChangeText() {
+        if (this.props.onChangeText) {
+            try {
+                const text = this.jsonEditor.getText();
+                this.props.onChangeText(text);
             } catch (err) {
                 this.err = err;
             }
@@ -224,6 +243,7 @@ Editor.propTypes = {
     schemaRefs: PropTypes.object,
 
     onChange: PropTypes.func,
+    onChangeText: PropTypes.func,
     onError: PropTypes.func,
     onModeChange: PropTypes.func,
 
